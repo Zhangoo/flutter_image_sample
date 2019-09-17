@@ -1,8 +1,8 @@
 name: flutter_image_sample
-description: A new Flutter plugin.
+description: Create sample Image with native code(kotlin),This library can only work Android
 version: 0.0.1
-author:
-homepage:
+author: zhangoo<zhangoomail@126.com>
+homepage: https://github.com/Zhangoo/flutter_image_sample
 
 environment:
   sdk: ">=2.1.0 <3.0.0"

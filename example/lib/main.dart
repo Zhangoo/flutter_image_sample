@@ -1,8 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_image_sample/flutter_image_sample.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,32 +16,35 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  String _imageWidth = "Unknown";
+  String _imageHeight = "Unknown";
+  Uint8List _imageData;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    getExternalStorageDirectory().then((value) {
+      final imagePath = value.path + Platform.pathSeparator + "1.png";
+      FlutterImageSample.getImageSize(imagePath).then((size) {
+        setState(() {
+          _imageWidth = size[0].toString();
+          _imageHeight = size[1].toString();
+        });
+      });
+      FlutterImageSample.getImageSample(imagePath, 150, 150).then((value){
+        setState(() {
+          _imageData = value;
+        });
+      });
+    });
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      platformVersion = await FlutterImageSample.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+  Widget _createImage() {
+    if (_imageData == null) {
+      return Text("");
+    } else {
+      return Image.memory(_imageData);
     }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   @override
@@ -47,9 +54,24 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
+        body: Container(
+            child: Column(
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Text("Width:"),
+                    Text("$_imageWidth",style:TextStyle(color: Colors.blue)),
+                    Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text("Height:")),
+                    Text("$_imageHeight",style: TextStyle(color: Colors.blue),)
+                  ],
+                ),
+                _createImage()
+              ],
+            ),
+            width: double.infinity,
+            height: double.infinity),
       ),
     );
   }
